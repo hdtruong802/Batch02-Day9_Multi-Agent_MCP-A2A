@@ -1,0 +1,21 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+rag/
+venv/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+
+# Debug / temp
+_decomp_*.txt
+
+# Optional: regenerate locally (large files)
+# data/processed/
