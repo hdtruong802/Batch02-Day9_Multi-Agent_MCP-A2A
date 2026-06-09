@@ -194,19 +194,19 @@
               <td>Stage 5 E2E — sau tối ưu</td>
               <td><strong>13.85s</strong></td>
               <td><span class="badge badge-ok">OK + RESPONSE</span></td>
-              <td><code>stage5_e2e_output.txt</code></td>
+              <td><code>terminals/200648.txt</code></td>
             </tr>
             <tr>
               <td>Stage 5 — Tax Agent down (5.2)</td>
               <td><strong>10.57s</strong></td>
               <td><span class="badge badge-ok">OK (graceful)</span></td>
-              <td><code>stage5_tax_down_output.txt</code></td>
+              <td><code>Lab-Solution.md</code></td>
             </tr>
             <tr>
               <td>Routing LLM (check_routing)</td>
               <td><strong>5.94s</strong></td>
               <td>1 LLM call / request</td>
-              <td><code>exercise_6_summary.py</code> run</td>
+              <td><code>Lab-Solution.md</code> / dev log</td>
             </tr>
             <tr>
               <td>Routing keyword</td>
@@ -224,7 +224,7 @@
               <td>Exercise 4 multi-agent</td>
               <td><strong>~46s</strong></td>
               <td><span class="badge badge-ok">OK</span></td>
-              <td><code>exercise4_output.txt</code></td>
+              <td><code>Lab-Solution.md</code></td>
             </tr>
           </tbody>
         </table>
@@ -327,7 +327,7 @@ The agent chain is still slow (many LLM calls). Try:
 a2a.client.errors.A2AClientTimeoutError: Timeout Error: Client Request timed out</pre>
 
       <p class="evidence-title"><span class="badge badge-ok">SUCCESS</span> Sau tối ưu — Stage 5 E2E</p>
-      <p class="evidence-title">Nguồn: <code>stage5_e2e_output.txt</code> · <code>terminals/200648.txt</code> · <code>elapsed_ms: 34368</code></p>
+      <p class="evidence-title">Nguồn: <code>terminals/200648.txt</code> · <code>elapsed_ms: 34368</code> · <code>Lab-Solution.md</code></p>
       <pre class="evidence">Connecting to Customer Agent at http://localhost:10100
 Question: If a company breaks a contract and avoids taxes, what are the legal and regulatory consequences?
 Connected to agent: Customer Agent v1.0.0
@@ -342,7 +342,7 @@ for a company and its officers involved in contract breaches and tax evasion.
 ...</pre>
 
       <p class="evidence-title"><span class="badge badge-ok">BENCHMARK</span> Routing keyword vs LLM</p>
-      <p class="evidence-title">Nguồn: <code>uv run python exercises/exercise_6_summary.py</code> → <code>terminals/507892.txt</code></p>
+      <p class="evidence-title">Nguồn: benchmark dev session → <code>terminals/507892.txt</code> (ghi trong <code>Lab-Solution.md</code>)</p>
       <pre class="evidence">BENCHMARK ROUTING (Bai tap cong diem)
 Cau hoi: If a company breaks a contract and avoids taxes, what are the legal and regulatory consequences?
 
@@ -362,7 +362,7 @@ Tiet kiem routing: ~5.94s / request (bo 1 LLM call o Law Agent)</pre>
 Latency Stage 4: 102.14s</pre>
 
       <p class="evidence-title"><span class="badge badge-ok">RESILIENCE</span> Tax Agent down — bài tập 5.2</p>
-      <p class="evidence-title">Nguồn: <code>stage5_tax_down_output.txt</code></p>
+      <p class="evidence-title">Nguồn: dev log bài 5.2 · <code>Lab-Solution.md</code></p>
       <pre class="evidence">Tax Agent stopped (PID ...)
 Sending request (may take 3-15 min with free models, timeout=1800s)...
 
@@ -387,14 +387,13 @@ uv run python test_client.py
 # Mở http://localhost:10200
 
 # Benchmark routing + Stage 4
-uv run python exercises/exercise_6_summary.py</pre>
+# Xem Lab-Solution.md mục "Bài tập cộng điểm"</pre>
       </div>
     </section>
 
     <footer>
       Báo cáo tự động tổng hợp từ log dev thực tế trong repo.
-      File evidence: <code>stage5_e2e_output.txt</code>, <code>stage5_tax_down_output.txt</code>,
-      <code>exercise4_output.txt</code>, terminal sessions trong Cursor.
+      File evidence: log dev trong <code>Lab-Solution.md</code>, terminal sessions Cursor, <code>docs/latency_report.html</code>.
       CODELAB bài cộng điểm: Phần 6 — latency trước/sau + phương án tối ưu.
     </footer>
   </div>
