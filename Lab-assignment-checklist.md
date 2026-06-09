@@ -1,7 +1,7 @@
 # Checklist Assignment Files Day09
 
 ## 1. File Lab-Solution.md
-    giải quyết các bài Lab trên lớp
+    Đã hoàn thành — xem [`Lab-Solution.md`](Lab-Solution.md)
 
 ## 2. Assignment File: Improve Agent Day08 sử dụng partern Supervisor - Workers (ít nhất 2-3 workers)
     Tạo folder mới tên là Lab_Assignment vả đặt toàn bộ code dưới folder này.
