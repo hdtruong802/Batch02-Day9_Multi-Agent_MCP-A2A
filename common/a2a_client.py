@@ -7,6 +7,7 @@ sends a message to another A2A agent and returns the text response.
 from __future__ import annotations
 
 import logging
+import os
 from uuid import uuid4
 
 import httpx
@@ -23,6 +24,12 @@ from a2a.types import (
 )
 
 logger = logging.getLogger(__name__)
+
+A2A_HTTP_TIMEOUT = float(os.getenv("A2A_HTTP_TIMEOUT", "1800"))
+
+
+def _http_timeout() -> httpx.Timeout:
+    return httpx.Timeout(A2A_HTTP_TIMEOUT, connect=30.0)
 
 
 async def delegate(
@@ -44,7 +51,8 @@ async def delegate(
     Returns:
         The agent's text response, or an empty string if none could be extracted.
     """
-    async with httpx.AsyncClient(timeout=300.0) as http_client:
+    http_timeout = _http_timeout()
+    async with httpx.AsyncClient(timeout=http_timeout) as http_client:
         # Fetch agent card
         card_url = f"{endpoint}/.well-known/agent.json"
         card_resp = await http_client.get(card_url)
@@ -72,14 +80,24 @@ async def delegate(
             params=MessageSendParams(message=message),
         )
 
+        from common.demo_trace import agent_from_endpoint, emit, set_trace_id
+
+        set_trace_id(trace_id)
+        target = agent_from_endpoint(endpoint)
+        await emit(target, "started", detail=f"depth={depth}", trace_id=trace_id)
+
         logger.debug(
             "Delegating to %s (depth=%d, trace=%s)", endpoint, depth, trace_id
         )
 
-        response = await client.send_message(request)
+        response = await client.send_message(
+            request,
+            http_kwargs={"timeout": http_timeout},
+        )
 
-        # Extract text from SendMessageResponse
-        return _extract_text(response)
+        text = _extract_text(response)
+        await emit(target, "completed", detail=f"depth={depth}", trace_id=trace_id)
+        return text
 
 
 def _extract_text(response: object) -> str:

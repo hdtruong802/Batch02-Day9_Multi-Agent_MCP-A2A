@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Legal Multi-Agent Demo</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header class="header">
+    <div>
+      <h1>Legal Multi-Agent System</h1>
+      <p class="subtitle">A2A distributed agents — live graph + chat demo</p>
+    </div>
+    <div class="header-meta">
+      <span id="healthBadge" class="badge badge-warn">Checking...</span>
+      <div class="latency-box">
+        <span class="latency-label">Latency</span>
+        <span id="latencyValue" class="latency-value">—</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="panel chat-panel">
+      <h2>Chatbot</h2>
+      <div id="chatMessages" class="chat-messages"></div>
+      <form id="chatForm" class="chat-form">
+        <textarea
+          id="questionInput"
+          rows="3"
+          placeholder="Ví dụ: If a company breaks a contract and avoids taxes, what are the consequences?"
+        ></textarea>
+        <button type="submit" id="sendBtn">Gửi câu hỏi</button>
+      </form>
+    </section>
+
+    <section class="panel graph-panel">
+      <h2>Agent Graph (live)</h2>
+      <p class="graph-hint">Agent đang xử lý sẽ <strong>sáng lên</strong> theo thời gian thực.</p>
+      <div class="graph-wrap">
+        <svg id="agentGraph" viewBox="0 0 720 480" aria-label="Agent architecture graph">
+          <defs>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
+          <!-- edges -->
+          <g class="edges">
+            <line class="edge" data-edge="user-customer" x1="360" y1="58" x2="360" y2="98" />
+            <line class="edge" data-edge="customer-registry" x1="300" y1="130" x2="180" y2="170" />
+            <line class="edge" data-edge="customer-law" x1="360" y1="150" x2="360" y2="210" />
+            <line class="edge" data-edge="law-registry" x1="300" y1="250" x2="180" y2="210" />
+            <line class="edge" data-edge="law-tax" x1="320" y1="290" x2="220" y2="360" />
+            <line class="edge" data-edge="law-compliance" x1="400" y1="290" x2="500" y2="360" />
+          </g>
+
+          <!-- nodes -->
+          <g class="nodes">
+            <g class="node" data-agent="user" transform="translate(300, 20)">
+              <rect width="120" height="38" rx="10" />
+              <text x="60" y="24">User</text>
+            </g>
+            <g class="node" data-agent="customer" transform="translate(270, 100)">
+              <rect width="180" height="50" rx="10" />
+              <text x="90" y="22">Customer Agent</text>
+              <text x="90" y="38" class="port">:10100</text>
+            </g>
+            <g class="node" data-agent="registry" transform="translate(60, 170)">
+              <rect width="160" height="50" rx="10" />
+              <text x="80" y="22">Registry</text>
+              <text x="80" y="38" class="port">:10000</text>
+            </g>
+            <g class="node" data-agent="law" transform="translate(270, 210)">
+              <rect width="180" height="50" rx="10" />
+              <text x="90" y="22">Law Agent</text>
+              <text x="90" y="38" class="port">:10101</text>
+            </g>
+            <g class="node" data-agent="tax" transform="translate(120, 360)">
+              <rect width="160" height="50" rx="10" />
+              <text x="80" y="22">Tax Agent</text>
+              <text x="80" y="38" class="port">:10102</text>
+            </g>
+            <g class="node" data-agent="compliance" transform="translate(440, 360)">
+              <rect width="180" height="50" rx="10" />
+              <text x="90" y="22">Compliance Agent</text>
+              <text x="90" y="38" class="port">:10103</text>
+            </g>
+          </g>
+        </svg>
+      </div>
+      <div id="activityLog" class="activity-log"></div>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

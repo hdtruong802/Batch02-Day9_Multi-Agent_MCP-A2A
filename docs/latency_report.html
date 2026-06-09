@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Báo cáo Latency — Legal Multi-Agent A2A</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: #141c2e;
+      --border: #2a3650;
+      --text: #e8eef7;
+      --muted: #8fa3bf;
+      --before: #ef4444;
+      --after: #22c55e;
+      --accent: #3b82f6;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: linear-gradient(160deg, #0f172a 0%, var(--bg) 50%);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 2rem 1.25rem 3rem; }
+    header { margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; }
+    h1 { margin: 0 0 0.5rem; font-size: 1.75rem; }
+    .meta { color: var(--muted); font-size: 0.9rem; }
+    h2 { font-size: 1.15rem; color: var(--accent); margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    .stat {
+      text-align: center;
+      padding: 1rem;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.25);
+    }
+    .stat .value { font-size: 2rem; font-weight: 700; }
+    .stat.before .value { color: var(--before); }
+    .stat.after .value { color: var(--after); }
+    .stat .label { font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+    th, td { padding: 0.65rem 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
+    th { color: var(--muted); font-weight: 600; }
+    .bar-chart { margin: 1.5rem 0; }
+    .bar-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem; }
+    .bar-label { width: 140px; font-size: 0.85rem; color: var(--muted); flex-shrink: 0; }
+    .bar-track { flex: 1; height: 28px; background: rgba(0,0,0,0.3); border-radius: 6px; overflow: hidden; }
+    .bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      padding-left: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      min-width: 48px;
+    }
+    .bar-fill.before { background: linear-gradient(90deg, #991b1b, var(--before)); width: 100%; }
+    .bar-fill.after { background: linear-gradient(90deg, #166534, var(--after)); width: 1.54%; min-width: 60px; }
+    .bar-fill.routing-llm { background: #b45309; width: 100%; }
+    .bar-fill.routing-kw { background: var(--after); width: 0.2%; min-width: 50px; }
+    ol.improvements li { margin-bottom: 0.75rem; }
+    ol.improvements strong { color: #93c5fd; }
+    .why { color: var(--muted); font-size: 0.9rem; margin-top: 0.25rem; }
+    pre.evidence {
+      background: #0a0e17;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      overflow-x: auto;
+      font-size: 0.78rem;
+      line-height: 1.45;
+      color: #a8b8d0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .evidence-title {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin: 1rem 0 0.35rem;
+    }
+    .evidence-title code { color: #fbbf24; }
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge-fail { background: rgba(239,68,68,0.2); color: #fca5a5; }
+    .badge-ok { background: rgba(34,197,94,0.2); color: #86efac; }
+    footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85rem; }
+    .improvement-pct {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--after);
+      text-align: center;
+      margin: 1rem 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Báo cáo Latency — Stage 5 Distributed A2A</h1>
+      <p class="meta">
+        Dự án: Batch02-Day9 Multi-Agent MCP-A2A &nbsp;|&nbsp;
+        Ngày đo: 09/06/2026 &nbsp;|&nbsp;
+        Model: <code>gemini-2.5-flash-lite</code> &nbsp;|&nbsp;
+        Câu hỏi test chuẩn: contract breach + tax evasion
+      </p>
+    </header>
+
+    <section>
+      <h2>Tóm tắt</h2>
+      <div class="card">
+        <p>
+          Hệ thống Stage 5 (5 service A2A: Customer → Law → Tax + Compliance) ban đầu
+          <strong>không hoàn thành</strong> trong giới hạn timeout 900 giây. Sau các tối ưu kiến trúc và giảm số lần gọi LLM,
+          cùng một câu hỏi hoàn tất trong <strong>13.85 giây</strong> — cải thiện ít nhất <strong>~65×</strong> so với ngưỡng timeout trước đó.
+        </p>
+        <div class="summary-grid">
+          <div class="stat before">
+            <div class="value">≥900s</div>
+            <div class="label">Trước (timeout, thất bại)</div>
+          </div>
+          <div class="stat after">
+            <div class="value">13.85s</div>
+            <div class="label">Sau (E2E thành công)</div>
+          </div>
+          <div class="stat after">
+            <div class="value">~65×</div>
+            <div class="label">Nhanh hơn (so với 900s)</div>
+          </div>
+        </div>
+        <p class="improvement-pct">Từ timeout 15 phút → phản hồi dưới 14 giây</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>So sánh trực quan (Stage 5 E2E)</h2>
+      <div class="card bar-chart">
+        <div class="bar-row">
+          <span class="bar-label">Trước tối ưu</span>
+          <div class="bar-track">
+            <div class="bar-fill before">≥900s (TIMEOUT)</div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">Sau tối ưu</span>
+          <div class="bar-track">
+            <div class="bar-fill after">13.85s</div>
+          </div>
+        </div>
+        <p style="font-size:0.85rem;color:var(--muted);margin:0.5rem 0 0;">
+          Thanh “sau” được scale tương đối so với 900s (13.85/900 ≈ 1.5% chiều rộng).
+        </p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Bảng số liệu (evidence từ log dev)</h2>
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Kịch bản</th>
+              <th>Latency</th>
+              <th>Kết quả</th>
+              <th>Nguồn log</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Stage 5 E2E — trước tối ưu</td>
+              <td><strong>900s</strong> (timeout)</td>
+              <td><span class="badge badge-fail">FAILED</span></td>
+              <td><code>terminals/912905.txt</code></td>
+            </tr>
+            <tr>
+              <td>Stage 5 E2E — sau tối ưu</td>
+              <td><strong>13.85s</strong></td>
+              <td><span class="badge badge-ok">OK + RESPONSE</span></td>
+              <td><code>stage5_e2e_output.txt</code></td>
+            </tr>
+            <tr>
+              <td>Stage 5 — Tax Agent down (5.2)</td>
+              <td><strong>10.57s</strong></td>
+              <td><span class="badge badge-ok">OK (graceful)</span></td>
+              <td><code>stage5_tax_down_output.txt</code></td>
+            </tr>
+            <tr>
+              <td>Routing LLM (check_routing)</td>
+              <td><strong>5.94s</strong></td>
+              <td>1 LLM call / request</td>
+              <td><code>exercise_6_summary.py</code> run</td>
+            </tr>
+            <tr>
+              <td>Routing keyword</td>
+              <td><strong>0.01ms</strong></td>
+              <td>0 LLM call</td>
+              <td><code>terminals/507892.txt</code></td>
+            </tr>
+            <tr>
+              <td>Stage 4 in-process (tham chiếu)</td>
+              <td><strong>102.14s</strong></td>
+              <td><span class="badge badge-ok">OK</span></td>
+              <td><code>terminals/507892.txt</code></td>
+            </tr>
+            <tr>
+              <td>Exercise 4 multi-agent</td>
+              <td><strong>~46s</strong></td>
+              <td><span class="badge badge-ok">OK</span></td>
+              <td><code>exercise4_output.txt</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card bar-chart" style="margin-top:1rem;">
+        <p style="margin:0 0 0.75rem;font-size:0.9rem;color:var(--muted);">Routing: LLM vs Keyword (cùng câu hỏi)</p>
+        <div class="bar-row">
+          <span class="bar-label">LLM routing</span>
+          <div class="bar-track"><div class="bar-fill routing-llm">5.94s</div></div>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">Keyword routing</span>
+          <div class="bar-track"><div class="bar-fill routing-kw">0.01ms</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Đã cải thiện những gì &amp; vì sao</h2>
+      <div class="card">
+        <ol class="improvements">
+          <li>
+            <strong>Keyword routing thay LLM <code>check_routing</code></strong> (Law Agent)
+            <div class="why">
+              Mỗi request tiết kiệm ~5.94s (đo thực tế) và tránh thêm 1 round-trip LLM không cần thiết khi từ khóa đã đủ (tax, compliance, regulatory…).
+              File: <code>law_agent/graph.py</code> — hàm <code>route_to_subagents()</code>.
+            </div>
+          </li>
+          <li>
+            <strong>Customer Agent: delegate trực tiếp, bỏ ReAct loop</strong>
+            <div class="why">
+              ReAct cần ít nhất 1–2 lần gọi LLM chỉ để quyết định gọi tool. Với entry-point luôn delegate sang Law, gọi thẳng A2A giảm latency và token.
+              File: <code>customer_agent/agent_executor.py</code>.
+            </div>
+          </li>
+          <li>
+            <strong>Tax &amp; Compliance: 1 LLM call, bỏ <code>create_react_agent</code> không tool</strong>
+            <div class="why">
+              ReAct không có tool vẫn chạy agent loop — overhead vô ích. Chuyển sang StateGraph 1 node = 1 <code>ainvoke</code>.
+              File: <code>tax_agent/graph.py</code>, <code>compliance_agent/graph.py</code>.
+            </div>
+          </li>
+          <li>
+            <strong>Rút gọn system prompt</strong> (Law, Tax, Compliance, Customer)
+            <div class="why">
+              Giảm token input/output mỗi hop LLM; với free/slow API mỗi 100 token có thể thêm vài giây.
+            </div>
+          </li>
+          <li>
+            <strong>Tax + Compliance chạy song song</strong> (LangGraph <code>Send</code> API)
+            <div class="why">
+              Thời gian ≈ max(tax, compliance) thay vì tổng tuần tự — đã có từ Stage 4, giữ nguyên trong Law Agent.
+            </div>
+          </li>
+          <li>
+            <strong>Đổi model Gemini + tăng <code>A2A_HTTP_TIMEOUT</code></strong>
+            <div class="why">
+              <code>gemini-2.0-flash</code> deprecated / quota 0; chuyển <code>gemini-2.5-flash-lite</code>. Timeout 900→1800s trong giai đoạn debug, sau tối ưu request xong &lt;15s.
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section>
+      <h2>Ước lượng số lần gọi LLM / request</h2>
+      <div class="card">
+        <table>
+          <thead>
+            <tr><th>Thành phần</th><th>Trước (ước lượng)</th><th>Sau</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Customer Agent</td><td>2+ (ReAct)</td><td>0 (chỉ delegate HTTP)</td></tr>
+            <tr><td>Law — routing</td><td>1 (LLM check_routing)</td><td>0 (keyword)</td></tr>
+            <tr><td>Law — analyze + aggregate</td><td>2</td><td>2</td></tr>
+            <tr><td>Tax Agent</td><td>1+ (ReAct loop)</td><td>1</td></tr>
+            <tr><td>Compliance Agent</td><td>1+ (ReAct loop)</td><td>1</td></tr>
+            <tr><td><strong>Tổng LLM calls</strong></td><td><strong>~8–10+</strong></td><td><strong>~4</strong> (song song tax/compliance)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>Evidence — log thực khi dev</h2>
+
+      <p class="evidence-title"><span class="badge badge-fail">FAILED</span> Trước tối ưu — <code>test_client.py</code> timeout sau 900s</p>
+      <p class="evidence-title">Nguồn: <code>terminals/912905.txt</code> · <code>elapsed_ms: 908976</code></p>
+      <pre class="evidence">Connecting to Customer Agent at http://localhost:10100
+Question: If a company breaks a contract and avoids taxes, what are the legal and regulatory consequences?
+Connected to agent: Customer Agent v1.0.0
+Sending request (may take 3-15 min with free models, timeout=900s)...
+
+ERROR: Request timed out after 900s.
+The agent chain is still slow (many LLM calls). Try:
+  1. Increase A2A_HTTP_TIMEOUT in .env (e.g. 1200)
+  2. Use a faster model in GEMINI_MODEL (or OPENROUTER_MODEL)
+  3. Ensure all 5 services are running (.\start_all.ps1)
+a2a.client.errors.A2AClientTimeoutError: Timeout Error: Client Request timed out</pre>
+
+      <p class="evidence-title"><span class="badge badge-ok">SUCCESS</span> Sau tối ưu — Stage 5 E2E</p>
+      <p class="evidence-title">Nguồn: <code>stage5_e2e_output.txt</code> · <code>terminals/200648.txt</code> · <code>elapsed_ms: 34368</code></p>
+      <pre class="evidence">Connecting to Customer Agent at http://localhost:10100
+Question: If a company breaks a contract and avoids taxes, what are the legal and regulatory consequences?
+Connected to agent: Customer Agent v1.0.0
+Sending request (may take 3-15 min with free models, timeout=1800s)...
+
+Latency: 13.85s
+------------------------------------------------------------
+RESPONSE:
+============================================================
+This analysis outlines the potential legal, tax, and regulatory consequences
+for a company and its officers involved in contract breaches and tax evasion.
+...</pre>
+
+      <p class="evidence-title"><span class="badge badge-ok">BENCHMARK</span> Routing keyword vs LLM</p>
+      <p class="evidence-title">Nguồn: <code>uv run python exercises/exercise_6_summary.py</code> → <code>terminals/507892.txt</code></p>
+      <pre class="evidence">BENCHMARK ROUTING (Bai tap cong diem)
+Cau hoi: If a company breaks a contract and avoids taxes, what are the legal and regulatory consequences?
+
+[Keyword routing] targets=['call_tax', 'call_compliance']  time=0.01ms
+[LLM routing]     raw={"needs_tax": true, "needs_compliance": true}...
+[LLM routing]     time=5.94s
+
+Tiet kiem routing: ~5.94s / request (bo 1 LLM call o Law Agent)</pre>
+
+      <p class="evidence-title"><span class="badge badge-ok">REFERENCE</span> Stage 4 in-process (đã tối ưu routing)</p>
+      <pre class="evidence">[Node: route_to_specialists] Dispatching to: ['call_tax_specialist', 'call_compliance_specialist']
+[Node: call_tax_specialist] Tax specialist agent starting...
+[Node: call_compliance_specialist] Compliance specialist agent starting...
+[Node: call_compliance_specialist] Done (2186 chars)
+[Node: call_tax_specialist] Done (2515 chars)
+[Node: aggregate] Done (4686 chars)
+Latency Stage 4: 102.14s</pre>
+
+      <p class="evidence-title"><span class="badge badge-ok">RESILIENCE</span> Tax Agent down — bài tập 5.2</p>
+      <p class="evidence-title">Nguồn: <code>stage5_tax_down_output.txt</code></p>
+      <pre class="evidence">Tax Agent stopped (PID ...)
+Sending request (may take 3-15 min with free models, timeout=1800s)...
+
+Latency: 10.57s
+------------------------------------------------------------
+RESPONSE:
+... (he thong van tra loi, khong crash) ...</pre>
+    </section>
+
+    <section>
+      <h2>Cách tái hiện</h2>
+      <div class="card">
+        <pre class="evidence" style="color:#e2e8f0;"># Terminal 1
+.\start_all.ps1
+
+# Terminal 2 — đo latency
+uv run python test_client.py
+# Xem dòng: Latency: X.XXs
+
+# Hoặc demo UI
+.\start_demo.ps1
+# Mở http://localhost:10200
+
+# Benchmark routing + Stage 4
+uv run python exercises/exercise_6_summary.py</pre>
+      </div>
+    </section>
+
+    <footer>
+      Báo cáo tự động tổng hợp từ log dev thực tế trong repo.
+      File evidence: <code>stage5_e2e_output.txt</code>, <code>stage5_tax_down_output.txt</code>,
+      <code>exercise4_output.txt</code>, terminal sessions trong Cursor.
+      CODELAB bài cộng điểm: Phần 6 — latency trước/sau + phương án tối ưu.
+    </footer>
+  </div>
+</body>
+</html>
