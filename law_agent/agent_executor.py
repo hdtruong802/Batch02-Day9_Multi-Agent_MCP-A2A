@@ -29,10 +29,14 @@ class LawAgentExecutor(AgentExecutor):
         trace_id = metadata.get("trace_id", str(uuid4()))
         depth = int(metadata.get("delegation_depth", 0))
 
+        from common.demo_trace import emit, set_trace_id
+
+        set_trace_id(trace_id)
         logger.info(
             "LawAgent executing | task=%s context=%s trace=%s depth=%d",
             task_id, context_id, trace_id, depth,
         )
+        await emit("law", "started", detail="execute", trace_id=trace_id)
 
         updater = TaskUpdater(event_queue, task_id, context_id)
         await updater.submit()
@@ -46,8 +50,6 @@ class LawAgentExecutor(AgentExecutor):
                     "trace_id": trace_id,
                     "delegation_depth": depth,
                     "law_analysis": "",
-                    "needs_tax": False,
-                    "needs_compliance": False,
                     "tax_result": "",
                     "compliance_result": "",
                     "final_answer": "",
@@ -67,6 +69,7 @@ class LawAgentExecutor(AgentExecutor):
                 name="legal_analysis",
             )
             await updater.complete()
+            await emit("law", "completed", detail="execute", trace_id=trace_id)
 
         except Exception as exc:
             logger.exception("LawAgent execution error: %s", exc)

@@ -12,21 +12,16 @@ REGISTRY_URL = os.getenv("REGISTRY_URL", "http://localhost:10000")
 
 
 async def discover(task: str) -> str:
-    """Return the endpoint URL of the agent that handles the given task.
+    """Return the endpoint URL of the agent that handles the given task."""
+    from common.demo_trace import emit
 
-    Args:
-        task: The task identifier (e.g. "legal_question", "tax_question").
-
-    Returns:
-        The HTTP endpoint base URL of the matching agent.
-
-    Raises:
-        httpx.HTTPStatusError: If no agent is found or the registry is unreachable.
-    """
+    await emit("registry", "started", detail=task)
     async with httpx.AsyncClient(timeout=10.0) as client:
         resp = await client.get(f"{REGISTRY_URL}/discover/{task}")
         resp.raise_for_status()
-        return resp.json()["endpoint"]
+        endpoint = resp.json()["endpoint"]
+        await emit("registry", "completed", detail=task)
+        return endpoint
 
 
 async def register(agent_info: dict) -> None:
